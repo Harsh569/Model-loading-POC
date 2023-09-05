@@ -13,7 +13,8 @@
     <div class="container">
         <div class="upload-section">
             <h2>Upload 3D Models</h2>
-            <input id="fileInput" type="file" accept=".glb,.fbx,.stl,.obj" multiple>
+            <input type="file" id="folder" webkitdirectory multiple/>
+            <!-- <input id="fileInput" type="file" accept=".glb,.fbx,.stl,.obj" multiple> -->
             <button id="uploadButton">Upload Models</button>
         </div>
         <div class="cesium-section">
@@ -66,22 +67,27 @@
         // Function to load and display a single 3D model
         // Function to load and display a single 3D model with fixed spacing
                 // Modify the file input event to handle multiple model uploads
-                const fileInput = document.getElementById('fileInput');
+                const folder = document.getElementById('folder');
 let spacing = 0.0005;
 let modelCounter = 0; // Maintain a separate counter for the models
 
-fileInput.addEventListener('change', async (event) => {
+folder.addEventListener('change', async (event) => {
     const files = event.target.files;
     if (files) {
         for (let i = 0; i < files.length; i++) {
             const modelPath = URL.createObjectURL(files[i]);
             await loadModel(modelPath, modelCounter); // Use the modelCounter
-            spacing += 0.001;
+            spacing = 0.0050;
             modelCounter++; // Increment the model counter
             console.log('i is', i);
+            await sleep(10000)
         }
     }
 });
+
+function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
 
 async function loadModel(modelPath, modelCounter) {
     const longitude = 30.518624 + (modelCounter * spacing); // Use modelCounter
