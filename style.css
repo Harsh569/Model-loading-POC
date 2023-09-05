@@ -1,0 +1,31 @@
+body {
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+}
+
+.container {
+    display: flex;
+    height: 100vh;
+}
+
+.upload-section, .cesium-section {
+    flex: 1;
+    padding: 20px;
+    border: 1px solid #ccc;
+}
+
+.upload-section {
+    background-color: #f0f0f0;
+}
+
+.cesium-section {
+    background-color: #ffffff;
+    position: relative;
+    overflow: hidden;
+}
+
+#cesiumContainer {
+    width: 100%;
+    height: 100%;
+}

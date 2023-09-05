@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Display 3D Models in Cesium JS</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cesium.com/downloads/cesiumjs/releases/1.108/Build/Cesium/Cesium.js"></script>
+    <link href="https://cesium.com/downloads/cesiumjs/releases/1.108/Build/Cesium/Widgets/widgets.css" rel="stylesheet">
+    <title>3D Model Viewer</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <div class="upload-section">
+            <h2>Upload 3D Models</h2>
+            <input id="fileInput" type="file" accept=".glb,.fbx,.stl,.obj" multiple>
+            <button id="uploadButton">Upload Models</button>
+        </div>
+        <div class="cesium-section">
+            <h2>3D Model Viewer</h2>
+            <div id="cesiumContainer"></div>
+        </div>
+    </div>
+    <script type="module">
+
+        Cesium.Ion.defaultAccessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiIyODc3MjliOS0xN2Q3LTQ4NTgtYjY3OC02YWEwYTFhNzE4YzYiLCJpZCI6MTYzNDc5LCJpYXQiOjE2OTMzNzYzNjZ9.H2GC_PvVkzP4_yOnwQaFbgZSYVUVZhOVvokYmJq8tkk';
+
+        // Initialize the Cesium Viewer in the HTML element with the `cesiumContainer` ID.
+        const viewer = new Cesium.Viewer('cesiumContainer', {
+            terrain: Cesium.Terrain.fromWorldTerrain(),
+        });
+
+        const locationLatitude = 6.675407;
+        const locationLongitude = 30.518624;
+        const locationHeight = 1000;
+        // Create a label entity for the location
+        const locationLabel = viewer.entities.add({
+            name: '', // Set the name or label text
+            position: Cesium.Cartesian3.fromDegrees(locationLongitude, locationLatitude, locationHeight), // Set the position
+            label: {
+                text: 'Lekakedu, South Sudan', // Set the text to display
+                font: '14px sans-serif', // Set the font style
+                fillColor: Cesium.Color.BLACK, // Set the label text color
+                outlineColor: Cesium.Color.BLACK, // Set the label outline color
+                outlineWidth: 1000, // Set the outline width
+                style: Cesium.LabelStyle.FILL_AND_OUTLINE, // Set the label style
+                pixelOffset: new Cesium.Cartesian2(0, -30), // Adjust the label's position relative to the point
+                heightReference: Cesium.HeightReference.RELATIVE_TO_GROUND, // Set the height reference
+            },
+        });
+        // Fly the camera to a specific location.
+        viewer.camera.flyTo({
+            destination: Cesium.Cartesian3.fromDegrees(locationLatitude, locationLongitude, locationHeight + 500),
+            orientation: {
+                heading: Cesium.Math.toRadians(0.0),
+                pitch: Cesium.Math.toRadians(-15.0),
+            }
+        });
+
+        viewer.zoomTo(locationLabel);
+
+
+        // Create an array to store loaded model entities
+        const loadedModels = [];
+
+        // Function to load and display a single 3D model
+        // Function to load and display a single 3D model with fixed spacing
+                // Modify the file input event to handle multiple model uploads
+                const fileInput = document.getElementById('fileInput');
+let spacing = 0.0005;
+let modelCounter = 0; // Maintain a separate counter for the models
+
+fileInput.addEventListener('change', async (event) => {
+    const files = event.target.files;
+    if (files) {
+        for (let i = 0; i < files.length; i++) {
+            const modelPath = URL.createObjectURL(files[i]);
+            await loadModel(modelPath, modelCounter); // Use the modelCounter
+            spacing += 0.001;
+            modelCounter++; // Increment the model counter
+            console.log('i is', i);
+        }
+    }
+});
+
+async function loadModel(modelPath, modelCounter) {
+    const longitude = 30.518624 + (modelCounter * spacing); // Use modelCounter
+    const latitude = 6.675407;
+    const height = 1000; // Adjust this height as needed
+    console.log('spacing', spacing);
+    console.log('modelpath', modelPath);
+    console.log('modelCounter', modelCounter);
+    const position = Cesium.Cartesian3.fromDegrees(longitude, latitude, height);
+    const orientation = Cesium.Transforms.headingPitchRollQuaternion(
+        position,
+        Cesium.HeadingPitchRoll.fromDegrees(135, 0, 0)
+    );
+
+    const entity = viewer.entities.add({
+        name: `3D Model ${modelCounter + 1}`, // Use modelCounter
+        position: position,
+        orientation: orientation,
+        model: {
+            uri: modelPath,
+        },
+    });
+
+    loadedModels.push(entity); // Add the loaded entity to the array
+    viewer.zoomTo(loadedModels); // Adjust the view to focus on the added entity
+    console.log('loadedmodels', loadedModels);
+    console.log('entity', entity);
+}
+
+        // Add a button to clear all loaded models
+        const clearButton = document.createElement('button');
+        clearButton.textContent = 'Clear All Models';
+        clearButton.addEventListener('click', () => {
+            viewer.entities.removeAll(); // Remove all loaded models from the viewer
+            loadedModels.length = 0; // Clear the loadedModels array
+        });
+
+        // Add buttons to the page
+        document.body.appendChild(clearButton);
+
+    </script>
+</body>
+</html>
